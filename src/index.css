@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* LIGHT MODE — bright version of your theme */
+
+:root {
+  --color-bg: #d9d2d3;
+  --color-card: #f2edf0;
+  --color-text-primary: #2A2A2A;
+  --color-text-secondary: #6B5E63;
+  --color-border: #e2d6da1e;
+  --color-accent: #A23D5D;
+}
+
+/* DARK MODE — your original palette */
+
+.dark {
+  --color-bg: #1a1a1f;
+  --color-card: #252530;
+  --color-text-primary: #D9D9D9;
+  --color-text-secondary: #C5B8BC;
+  --color-border: #c0c0c024;
+  --color-accent: #A23D5D;
+}
