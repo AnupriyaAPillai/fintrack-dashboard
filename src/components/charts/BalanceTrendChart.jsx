@@ -8,10 +8,9 @@ import {
   CartesianGrid,
   ResponsiveContainer,
 } from "recharts";
+import EmptyState from "../EmptyState";
 
-export default function BalanceTrendChart({
-  data,
-}) {
+export default function BalanceTrendChart({ data }) {
   return (
     <div
       className="
@@ -24,93 +23,44 @@ export default function BalanceTrendChart({
       "
     >
       <h3 className="text-accent mb-4">
-        Balance trend - Monthly 
+        Balance Trend - last 6 months
       </h3>
 
-      <ResponsiveContainer
-        width="100%"
-        height={280}
-      >
-        <LineChart data={data}>
-
-          {/* Gradient */}
-
-          <defs>
-            <linearGradient
-              id="balanceGradient"
-              x1="0"
-              y1="0"
-              x2="0"
-              y2="1"
-            >
-              <stop
-                offset="5%"
-                stopColor="#A23D5D"
-                stopOpacity={0.35}
-              />
-              <stop
-                offset="95%"
-                stopColor="#A23D5D"
-                stopOpacity={0}
-              />
-            </linearGradient>
-          </defs>
-
-          {/* Grid */}
+      {!data || data.length === 0 ? (
+        <EmptyState
+          icon="*"
+          message="No trend data yet"
+          sub="Add transactions to see your balance trend."
+        />
+      ) : (
+        <ResponsiveContainer width="100%" height={280}>
+          <LineChart data={data}>
 
           <CartesianGrid
-            strokeDasharray="3 3"
-            stroke="rgba(255,255,255,0.08)"
-          />
+              strokeDasharray="3 3"
+              stroke="var(--color-text-secondary)"
+              strokeOpacity={0.2}
+            />
 
-          {/* Axes */}
+            <XAxis dataKey="month" stroke="#9CA3AF" tickLine={false} axisLine={false} />
+            <YAxis stroke="#9CA3AF" tickLine={false} axisLine={false} tickFormatter={(v) => `₹${v / 1000}k`} />
 
-          <XAxis
-            dataKey="month"
-            stroke="#9CA3AF"
-            tickLine={false}
-            axisLine={false}
-          />
+            <Tooltip />
 
-          <YAxis
-            stroke="#9CA3AF"
-            tickLine={false}
-            axisLine={false}
-            tickFormatter={(v) =>
-              `₹${v / 1000}k`
-            }
-          />
+            <Area type="monotone" dataKey="income" stroke="none" fill="url(#balanceGradient)" />
 
-          <Tooltip />
+            <Line
+              type="monotone"
+              dataKey="income"
+              stroke="#A23D5D"
+              strokeWidth={3}
+              dot={{ r: 5, fill: "#A23D5D", stroke: "#fff", strokeWidth: 2 }}
+              activeDot={{ r: 7 }}
+            />
 
-          {/* Area */}
-
-          <Area
-            type="monotone"
-            dataKey="income"
-            stroke="none"
-            fill="url(#balanceGradient)"
-          />
-
-          {/* Line */}
-
-          <Line
-            type="monotone"
-            dataKey="income"
-            stroke="#A23D5D"
-            strokeWidth={3}
-            dot={{
-              r: 5,
-              fill: "#A23D5D",
-              stroke: "#fff",
-              strokeWidth: 2,
-            }}
-            activeDot={{ r: 7 }}
-          />
-
-        </LineChart>
-      </ResponsiveContainer>
-
+          </LineChart>
+        </ResponsiveContainer>
+      )}
     </div>
   );
 }

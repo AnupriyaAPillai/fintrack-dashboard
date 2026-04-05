@@ -1,7 +1,5 @@
-import { useDashboard } from "../context/DashboardContext";
-
 import KPIGrid from "../components/KPIGrid";
-import MonthlyBarChart from "../components/charts/MonthlyBarChart";
+import MonthlySavingsChart from "../components/charts/MonthlySavingsChart";
 import CategoryBarChart from "../components/charts/CategoryBarChart";
 
 export default function Insights() {
@@ -10,44 +8,18 @@ export default function Insights() {
 
       <KPIGrid />
 
-      <div
-      className="
-        bg-card
-        border
-        border-border
-        p-6
-        rounded-card
-        shadow-lg
-        shadow-accent/10
-      "
-    >
-
+      <div className="bg-card border border-border p-6 rounded-card shadow-lg shadow-accent/10">
         <h3 className="text-accent mb-4">
-          Monthly comparison - income vs expenses
+          Monthly net savings
         </h3>
-
-        <MonthlyBarChart />
-
+        <MonthlySavingsChart />
       </div>
 
-      <div
-      className="
-        bg-card
-        border
-        border-border
-        p-6
-        rounded-card
-        shadow-lg
-        shadow-accent/10
-      "
-    >
-
+      <div className="bg-card border border-border p-6 rounded-card shadow-lg shadow-accent/10">
         <h3 className="text-accent mb-4">
-          Spending by category - last 6 months
+          Spending by category
         </h3>
-
         <CategoryBarChart />
-
       </div>
 
     </div>

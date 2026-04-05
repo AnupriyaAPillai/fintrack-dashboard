@@ -2,6 +2,7 @@ import { useDashboard } from "../context/DashboardContext";
 import { useState, useMemo } from "react";
 import TransactionModal from "../components/TransactionModal";
 import Pagination from "../components/Pagination";
+import { transactionsData } from "../data/transactions";
 
 const PER_PAGE = 12;
 
@@ -20,12 +21,8 @@ export default function Transactions() {
   const categories = [...new Set(transactions.map((t) => t.category))];
 
   const toggleSort = (col) => {
-    if (sortBy === col) {
-      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
-    } else {
-      setSortBy(col);
-      setSortDir("desc");
-    }
+    if (sortBy === col) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    else { setSortBy(col); setSortDir("desc"); }
   };
 
   const SortIcon = ({ col }) => {
@@ -35,20 +32,15 @@ export default function Transactions() {
 
   const filtered = useMemo(() => {
     let list = transactions.filter((t) => {
-      if (search && !t.description.toLowerCase().includes(search.toLowerCase()))
-        return false;
+      if (search && !t.description.toLowerCase().includes(search.toLowerCase())) return false;
       if (typeFilter && t.type !== typeFilter) return false;
       if (categoryFilter && t.category !== categoryFilter) return false;
       return true;
     });
 
     list = [...list].sort((a, b) => {
-      let valA = a[sortBy];
-      let valB = b[sortBy];
-      if (sortBy === "amount") {
-        valA = Number(valA);
-        valB = Number(valB);
-      }
+      let valA = sortBy === "amount" ? Number(a[sortBy]) : a[sortBy];
+      let valB = sortBy === "amount" ? Number(b[sortBy]) : b[sortBy];
       if (valA < valB) return sortDir === "asc" ? -1 : 1;
       if (valA > valB) return sortDir === "asc" ? 1 : -1;
       return 0;
@@ -66,11 +58,15 @@ export default function Transactions() {
     }
   };
 
+  const resetData = () => {
+    if (window.confirm("Reset all transactions to the default dataset?")) {
+      setTransactions(transactionsData);
+    }
+  };
+
   const exportCSV = () => {
     const header = "Date,Description,Category,Type,Amount\n";
-    const rows = filtered
-      .map((t) => `${t.date},${t.description},${t.category},${t.type},${t.amount}`)
-      .join("\n");
+    const rows = filtered.map((t) => `${t.date},${t.description},${t.category},${t.type},${t.amount}`).join("\n");
     const blob = new Blob([header + rows], { type: "text/csv" });
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
@@ -80,6 +76,7 @@ export default function Transactions() {
 
   return (
     <div className="bg-card border border-border p-4 md:p-6 rounded-card shadow-lg shadow-accent/10">
+
       {/* Top bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
         <h2 className="text-accent font-semibold text-lg">Transactions</h2>
@@ -128,13 +125,42 @@ export default function Transactions() {
         </select>
       </div>
 
-      {/* Empty state */}
-      {filtered.length === 0 ? (
+      {/* Empty state — all transactions deleted */}
+      {transactions.length === 0 ? (
+        <div className="text-center py-16 text-textSecondary">
+          <div className="text-5xl mb-4"></div>
+          <p className="font-semibold text-textPrimary text-lg">All transactions deleted</p>
+          <p className="text-sm mt-2 mb-6">
+            {role === "admin"
+              ? "You can add new ones or restore the default data."
+              : "Contact an admin to restore data."}
+          </p>
+          {role === "admin" && (
+            <div className="flex gap-3 justify-center flex-wrap">
+              <button
+                onClick={() => { setEditTx(null); setShowModal(true); }}
+                className="px-5 py-2 bg-accent text-white rounded-full text-sm hover:opacity-90 transition"
+              >
+                + Add Transaction
+              </button>
+              <button
+                onClick={resetData}
+                className="px-5 py-2 border border-border text-textSecondary rounded-full text-sm hover:bg-bg transition"
+              >
+                Restore Default Data
+              </button>
+            </div>
+          )}
+        </div>
+
+      ) : filtered.length === 0 ? (
+        /* Empty state — filters return nothing */
         <div className="text-center py-16 text-textSecondary">
           <div className="text-4xl mb-3">📭</div>
-          <p className="font-medium">No transactions found</p>
-          <p className="text-sm mt-1">Try adjusting your filters{role === "admin" ? " or add a new transaction" : ""}.</p>
+          <p className="font-medium">No transactions match your filters</p>
+          <p className="text-sm mt-1">Try adjusting the search or filter options.</p>
         </div>
+
       ) : (
         <>
           {/* Desktop table */}
@@ -162,13 +188,11 @@ export default function Transactions() {
                     <td className="py-3 px-4 text-textSecondary">{t.date}</td>
                     <td className="py-3 px-4">{t.description}</td>
                     <td className="py-3 px-4">
-                        {t.category}
+                      {t.category}
                     </td>
                     <td className="py-3 px-4">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                        t.type === "income"
-                          ? "bg-emerald-500/10 text-emerald-500"
-                          : "bg-rose-400/10 text-rose-400"
+                        t.type === "income" ? "bg-emerald-500/10 text-emerald-500" : "bg-rose-400/10 text-rose-400"
                       }`}>
                         {t.type}
                       </span>
@@ -181,18 +205,8 @@ export default function Transactions() {
                     {role === "admin" && (
                       <td className="py-3 px-4">
                         <div className="flex gap-3">
-                          <button
-                            className="text-accent hover:underline text-xs"
-                            onClick={() => { setEditTx(t); setShowModal(true); }}
-                          >
-                            Edit
-                          </button>
-                          <button
-                            className="text-rose-400 hover:underline text-xs"
-                            onClick={() => deleteTx(t.id)}
-                          >
-                            Delete
-                          </button>
+                          <button className="text-accent hover:underline text-xs" onClick={() => { setEditTx(t); setShowModal(true); }}>Edit</button>
+                          <button className="text-rose-400 hover:underline text-xs" onClick={() => deleteTx(t.id)}>Delete</button>
                         </div>
                       </td>
                     )}
@@ -216,9 +230,7 @@ export default function Transactions() {
                       {t.type === "income" ? "+" : "-"}₹{Number(t.amount).toLocaleString("en-IN")}
                     </p>
                     <span className={`text-xs px-2 py-0.5 rounded-full mt-1 inline-block ${
-                      t.type === "income"
-                        ? "bg-emerald-500/10 text-emerald-500"
-                        : "bg-rose-400/10 text-rose-400"
+                      t.type === "income" ? "bg-emerald-500/10 text-emerald-500" : "bg-rose-400/10 text-rose-400"
                     }`}>
                       {t.type}
                     </span>
@@ -226,34 +238,22 @@ export default function Transactions() {
                 </div>
                 {role === "admin" && (
                   <div className="flex gap-4 mt-3 pt-3 border-t border-border">
-                    <button
-                      className="text-accent text-sm"
-                      onClick={() => { setEditTx(t); setShowModal(true); }}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="text-rose-400 text-sm"
-                      onClick={() => deleteTx(t.id)}
-                    >
-                      Delete
-                    </button>
+                    <button className="text-accent text-sm" onClick={() => { setEditTx(t); setShowModal(true); }}>Edit</button>
+                    <button className="text-rose-400 text-sm" onClick={() => deleteTx(t.id)}>Delete</button>
                   </div>
                 )}
               </div>
             ))}
           </div>
 
-          <div className="flex items-center justify-between mt-4 text-sm text-textSecondary">
+          <div className="flex items-center justify-between mt-4 text-sm text-textSecondary flex-wrap gap-2">
             <span>{filtered.length} transaction{filtered.length !== 1 ? "s" : ""}</span>
             <Pagination page={page} setPage={setPage} totalPages={totalPages} />
           </div>
         </>
       )}
 
-      {showModal && (
-        <TransactionModal editTx={editTx} setShowModal={setShowModal} />
-      )}
+      {showModal && <TransactionModal editTx={editTx} setShowModal={setShowModal} />}
     </div>
   );
 }
