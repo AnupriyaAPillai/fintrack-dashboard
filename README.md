@@ -31,7 +31,7 @@ src/
 │   │   ├── BalanceTrendChart.jsx   # Line chart – balance over time
 │   │   ├── CategoryBarChart.jsx    # Horizontal bar – spend by category
 │   │   ├── IncomeExpenseChart.jsx  # Grouped bar – income vs expenses
-│   │   ├── MonthlyBarChart.jsx     # Monthly comparison bar chart
+│   │   ├── MonthlySavingsChart.jsx     # Monthly comparison savings chart
 │   │   └── SpendingBreakdown.jsx   # Donut chart – category percentages
 │   ├── KPIGrid.jsx                 # Insight cards (top category, savings rate, avg expense)
 │   ├── Navbar.jsx                  # App header with role toggle and theme switch
@@ -42,11 +42,11 @@ src/
 ├── context/
 │   └── DashboardContext.jsx        # Global state via React Context
 ├── data/
-│   └── transactions.js             # Seed transaction data
+│   └── transactions.js             # Transaction data
 ├── pages/
 │   ├── Overview.jsx                # Dashboard home: summary + charts
 │   ├── Transactions.jsx            # Full transaction list with filter, sort, search
-│   └── Insights.jsx                # KPIs + monthly comparison + category breakdown
+│   └── Insights.jsx                # KPIs + monthly savings comparison + category breakdown
 ├── App.jsx
 ├── main.jsx
 └── index.css                       # Tailwind + CSS custom properties (light/dark themes)
